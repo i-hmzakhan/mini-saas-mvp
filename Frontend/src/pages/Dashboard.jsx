@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import ImageUploader from '../components/ImageUploader'
 import MetadataEditor from '../components/MetadataEditor'
+import { Trash2 } from 'lucide-react'
 
 export default function Dashboard({ session }) {
   const [currentFile, setCurrentFile] = useState(null)
@@ -21,6 +22,25 @@ export default function Dashboard({ session }) {
     setCurrentFile(null)
     setMetadata(null)
     fetchHistory() // Refresh history when they finish an edit
+  }
+
+  // --- NEW: Delete History Function ---
+  const handleDelete = async (recordId) => {
+    // Optional: Add a quick confirmation dialog
+    if (!window.confirm("Are you sure you want to delete this record?")) return;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/history/${recordId}`, {
+        method: 'DELETE',
+      })
+      
+      if (res.ok) {
+        // Remove the deleted item from the React state instantly
+        setHistory(history.filter(record => record.id !== recordId))
+      }
+    } catch (err) {
+      console.error("Failed to delete record:", err)
+    }
   }
 
   // --- NEW: Fetch History Function ---
@@ -87,15 +107,24 @@ export default function Dashboard({ session }) {
           ) : (
             <ul className="divide-y divide-gray-100">
               {history.map((record) => (
-                <li key={record.id} className="py-4 flex justify-between">
+                <li key={record.id} className="py-4 flex justify-between items-center group">
                   <div>
                     <p className="font-medium text-gray-900">{record.filename}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      Moved from: {record.original_lat || 'N/A'}, {record.original_lon || 'N/A'} → {record.modified_lat || 'N/A'}, {record.modified_lon || 'N/A'}
+                      <span className="font-semibold">GPS:</span> {record.original_lat || 'N/A'}, {record.original_lon || 'N/A'} → {record.modified_lat || 'N/A'}, {record.modified_lon || 'N/A'}
                     </p>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(record.created_at).toLocaleDateString()}
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-gray-500">
+                      {new Date(record.created_at).toLocaleDateString()}
+                    </span>
+                    <button 
+                      onClick={() => handleDelete(record.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      title="Delete record"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </li>
               ))}
