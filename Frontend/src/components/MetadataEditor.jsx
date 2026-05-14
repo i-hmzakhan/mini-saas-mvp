@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { Save, Download, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Save, Download, Loader2, MapPin } from 'lucide-react'
 
 export default function MetadataEditor({ file, initialMetadata, session }) {
+
+  const [previewUrl, setPreviewUrl] = useState(null)
   // Initialize state with the extracted data (or empty strings if null)
   const [formData, setFormData] = useState({
     latitude: initialMetadata?.latitude || '',
@@ -13,6 +15,17 @@ export default function MetadataEditor({ file, initialMetadata, session }) {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    if (!file) return;
+    
+    // Create a temporary local URL for the uploaded file
+    const objectUrl = URL.createObjectURL(file)
+    setPreviewUrl(objectUrl)
+
+    // Cleanup: Free memory when the component unmounts
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [file])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -80,6 +93,41 @@ export default function MetadataEditor({ file, initialMetadata, session }) {
         <h3 className="text-lg font-medium text-gray-900">Edit EXIF Data</h3>
         <p className="text-sm text-gray-500">Update the coordinates and details, then download your new image.</p>
       </div>
+
+      {/* --- NEW: Image Preview Section --- */}
+      {/* --- UPDATED: Split Image & Map Preview Section --- */}
+      {previewUrl && (
+        <div className="grid grid-cols-1 md:grid-cols-2 bg-gray-900 border-b border-gray-200">
+          {/* Left: Image Preview */}
+          <div className="p-4 flex justify-center items-center border-b md:border-b-0 md:border-r border-gray-700">
+            <img 
+              src={previewUrl} 
+              alt="Upload preview" 
+              className="max-h-64 w-auto rounded shadow-md object-contain"
+            />
+          </div>
+          
+          {/* Right: Live Map */}
+          <div className="p-4 flex justify-center items-center bg-gray-800">
+            {formData.latitude && formData.longitude ? (
+              <iframe
+                title="Live GPS Map"
+                width="100%"
+                height="100%"
+                className="min-h-[256px] w-full rounded shadow-md border-0"
+                src={`https://maps.google.com/maps?q=${formData.latitude},${formData.longitude}&z=14&output=embed`}
+                loading="lazy"
+                allowFullScreen
+              ></iframe>
+            ) : (
+              <div className="text-gray-400 text-sm text-center flex flex-col items-center">
+                <MapPin className="w-8 h-8 mb-2 opacity-50" />
+                <p>No valid GPS coordinates to display.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
       <form onSubmit={handleSaveAndDownload} className="p-6 space-y-6">
         {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
