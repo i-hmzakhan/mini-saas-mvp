@@ -1,0 +1,9 @@
+cd backend
+python -m venv venv
+
+# Activate the virtual environment
+# On Mac/Linux: source venv/bin/activate
+# On Windows: .\venv\Scripts\activate
+
+# Install the required packages
+pip install fastapi uvicorn sqlmodel pillow piexif supabase python-multipart
