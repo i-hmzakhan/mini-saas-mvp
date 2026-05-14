@@ -67,6 +67,19 @@ async def modify_image(
         headers={"Content-Disposition": f'attachment; filename="modified_{file.filename}"'}
     )
 
+@router.delete("/history/{record_id}")
+def delete_history_record(record_id: int, session: Session = Depends(get_session)):
+    """Deletes a specific image record from the database."""
+    record = session.get(ImageRecord, record_id)
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found.")
+        
+    session.delete(record)
+    session.commit()
+    
+    return {"message": "Record deleted successfully."}
+
 # --- NEW HISTORY ENDPOINT ---
 @router.get("/history/{user_id}")
 def get_user_history(user_id: str, session: Session = Depends(get_session)):
