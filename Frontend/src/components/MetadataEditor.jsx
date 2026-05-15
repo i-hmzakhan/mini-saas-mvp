@@ -54,7 +54,7 @@ export default function MetadataEditor({ file, initialMetadata, session }) {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/modify', {
+      const response = await fetch('https://hamzacodesforu-exif-engine.hf.space/api/modify', {
         method: 'POST',
         body: payload,
       })

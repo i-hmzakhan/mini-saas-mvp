@@ -26,7 +26,7 @@ export default function Dashboard({ session }) {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/history/${session.user.id}`)
+      const res = await fetch(`https://hamzacodesforu-exif-engine.hf.space/api/history/${session.user.id}`)
       if (res.ok) {
         const data = await res.json()
         setHistory(data)
@@ -39,7 +39,7 @@ export default function Dashboard({ session }) {
   const handleDelete = async (recordId) => {
     if (!window.confirm("Are you sure you want to delete this record?")) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/history/${recordId}`, {
+      const res = await fetch(`https://hamzacodesforu-exif-engine.hf.space/api/history/${recordId}`, {
         method: 'DELETE',
       })
       if (res.ok) {
