@@ -41,11 +41,15 @@ def modify_metadata(image_bytes: bytes, new_lat: float = None, new_lon: float = 
             exif_dict["GPS"][piexif.GPSIFD.GPSLongitudeRef] = lon_ref.encode('utf-8')
             exif_dict["GPS"][piexif.GPSIFD.GPSLongitude] = _convert_to_dms(new_lon)
 
-        # 2. Update Timestamp
+        # 2. Update Timestamp (FIXED: Applies to all 3 EXIF time tags)
         if new_timestamp:
-            exif_dict["0th"][piexif.ImageIFD.DateTime] = new_timestamp.encode('utf-8')
+            timestamp_bytes = new_timestamp.encode('utf-8')
+            
+            exif_dict["0th"][piexif.ImageIFD.DateTime] = timestamp_bytes
+            exif_dict["Exif"][piexif.ExifIFD.DateTimeOriginal] = timestamp_bytes
+            exif_dict["Exif"][piexif.ExifIFD.DateTimeDigitized] = timestamp_bytes
 
-        # 3. Update Description
+        # 3. Update Description (FIXED: Forces custom location/text into Description)
         if new_description is not None:
             exif_dict["0th"][piexif.ImageIFD.ImageDescription] = new_description.encode('utf-8')
 
