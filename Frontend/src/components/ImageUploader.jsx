@@ -24,7 +24,7 @@ export default function ImageUploader({ onUploadSuccess }) {
 
     try {
       // Send to our Python backend
-      const response = await fetch('http://127.0.0.1:8000/api/upload', {
+      const response = await fetch('https://hamzacodesforu-exif-engine.hf.space/api/upload', {
         method: 'POST',
         body: formData,
       })
